@@ -15,6 +15,7 @@ from ..services.twilio.TwilioClient import TwilioClient
 from twilio.base.exceptions import TwilioRestException
 from ..services.twilio.MessageTracking import MessageTracking
 from ..models.ProviderModels import Office, Provider
+from ..services.twilio.MessageHandling import MessageHandling
 
 
 message_bp = Blueprint("message", __name__)
@@ -64,53 +65,10 @@ def create_message():
     POST: Creates new message.
 
     """
-    # get phone number and msg from twixml
-    phone_number = request.values.get("From", None)
-    body = request.values.get("Body", None)
-    to = request.values.get("To", None)
-
-    office = Office.query.filter_by(phone_number=to).first()
-    provider_id = office.provider_id
-    provider = Provider.query.get(provider_id)
-    twilioClient = TwilioClient(provider.twilio_account_id, provider.twilio_auth_token)
-
-    # logic for handling signup of new users
-    try:
-        # see if user has signed up and been accepted
-        if TwilioSignUpHelpers.CheckIfAccepted(phone_number) == True:
-            status_msg = f"Your physician has received your message."
-            MessageTracking.create_new_message_patient(
-                phone_number=phone_number, body=body
-            )
-            twilioClient.send_message(
-                office.phone_number,
-                phone_number,
-                status_msg,
-            )
-            return WebHelpers.EasyResponse("Success.", 200)
-        # if new, prepare db table for new account registration
-        elif TwilioSignUpHelpers.CheckForNewUser(phone_number) == True:
-            status_msg = TwilioSignUpHelpers.InitiateUserSignUp(phone_number, body)
-            twilioClient.send_message(office.phone_number, phone_number, status_msg)
-            return WebHelpers.EasyResponse("Success.", 200)
-        # see if user has signed up but not accepted,
-        elif TwilioSignUpHelpers.CheckIfRegistered(phone_number) == True:
-            status_msg = (
-                f"Your physician is in the process of accepting your registration."
-            )
-            twilioClient.send_message(office.phone_number, phone_number, status_msg)
-            return WebHelpers.EasyResponse("Success.", 200)
-            # user has signed up but account not made yet, initiate signup form
-        else:
-            status_msg = TwilioSignUpHelpers.CreateNewUser(
-                phone_number=phone_number, msg=body
-            )
-            twilioClient.send_message(office.phone_number, phone_number, status_msg)
-            return WebHelpers.EasyResponse("Success.", 200)
-    except TwilioRestException as e:
-        logging.warning(e)
-        return WebHelpers.EasyResponse("Error", 400)
-
+    msgHandler = MessageHandling(request)
+    result = msgHandler.SignupFlow()
+    return result
+    
 
 @message_bp.route("/api/message/<int:id>", methods=["DELETE"])
 def delete_message(id):

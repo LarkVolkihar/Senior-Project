@@ -19,6 +19,7 @@ class Physician(UserMixin, db.Model):
     provider_id = db.Column(db.Integer, db.ForeignKey("Provider.id"), nullable=False)
     office_id = db.Column(db.Integer, db.ForeignKey("Office.id"), nullable=False)
     patients = db.relationship("Patient", backref="patients", lazy=True)
+    phone_number = db.Column(db.String(16), index=True)
     pnumber_patients = db.relationship(
         "PNumbertoUser", backref="pnumber_patients", lazy=True
     )
