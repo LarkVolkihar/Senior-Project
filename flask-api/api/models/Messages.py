@@ -4,8 +4,6 @@ from flask import current_app as app
 from .Physicians import Physician
 from sqlalchemy_utils import EncryptedType
 
-
-
 class Message(db.Model):
     """Model for messages between physicians and patients."""
 

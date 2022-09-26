@@ -58,7 +58,7 @@ def get_message(id):
         return resp
 
 
-@message_bp.route("/api/message/", methods=["POST"])
+@message_bp.post("/api/message/")
 @cross_origin()
 def create_message():
     """
