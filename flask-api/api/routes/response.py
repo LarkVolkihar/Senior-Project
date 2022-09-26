@@ -74,13 +74,13 @@ def update_response(id):
     old_name = response.name
 
     if response:
-        response.response = ['response']
+        response.response = request.form['response']
         db.session.commit()
 
         logging.warning(
             f"{current_user.name} updated response with id {response.id}."
         )
-        return WebHelpers.EasyResponse(f"Name updated.", 200)
+        return WebHelpers.EasyResponse(f"Response message updated.", 200)
     return WebHelpers.EasyResponse(f"Response with that id does not exist.", 404)
 
 
@@ -92,7 +92,7 @@ def delete_response(id):
     Deletes response with specified id.
     """
 
-    response = response.query.filter_by(id=id).first()
+    response = CustomResponse.query.get(id)
     response_name = response.name
     response_id = response.id
 
