@@ -11,8 +11,8 @@ app_bp = Blueprint("app_bp", __name__)
 @app.before_first_request
 def start_up():
     if Admin.query.count() == 0:
-
-        admin = Admin(name="admin", email="admin@email.com", password="adminpassword")
+        admin = Admin(name="admin", email="admin@email.com")
+        admin.set_password(password="adminpassword")
         admin.set_creation_date()
         db.session.add(admin)
         db.session.commit()

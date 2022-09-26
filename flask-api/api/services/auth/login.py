@@ -100,7 +100,7 @@ class Login:
 def admin_required(f):
     @wraps(f)
     def wrap(*args, **kwargs):
-        login_type = session.get("admin")
+        login_type = session.get("login_type")
         if login_type == "admin":
             return f(*args, **kwargs)
         else:
@@ -124,7 +124,7 @@ def physician_required(f):
 def employee_required(f):
     @wraps(f)
     def wrap(*args, **kwargs):
-        login_type = session.get("admin")
+        login_type = session.get("login_type")
         if (
             login_type == "admin"
             or login_type == "physician"
